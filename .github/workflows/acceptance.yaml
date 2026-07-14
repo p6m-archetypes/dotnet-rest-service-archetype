@@ -14,10 +14,6 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '9.0.x'
-      # TODO: switch to p6m-actions/prova-run (or prova-rs/run-action) once a prova release ships.
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-      - name: Install prova
-        run: cargo install --git https://github.com/prova-rs/prova prova-cli --locked
-      - name: Run acceptance suite
-        run: prova --profile ci
+      - uses: prova-rs/run-action@v1
+        with:
+          profile: ci
