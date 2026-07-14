@@ -1,0 +1,8 @@
+# Prova acceptance tests: `prova` from the repo root runs the whole suite.
+[run]
+paths = ["tests"]
+
+# CI runs the same suite; capability gating (docker/dotnet) handles what a runner lacks.
+[profiles.ci]
+paths = ["tests"]
+format = "json"

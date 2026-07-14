@@ -78,6 +78,11 @@ elseif context:get("persistence") == "MySQL" then
     require("dotnet-resource-mysql").render(context, dest)
 end
 
+-- Sample scaffold entity + CRUD routes over the persistence resource (partial AppDbContext).
+if context:get("has_persistence") then
+    directory.render("contents/persistence", context)
+end
+
 if context:get("has_cache") then
     require("dotnet-resource-redis").render(context, dest)
 end

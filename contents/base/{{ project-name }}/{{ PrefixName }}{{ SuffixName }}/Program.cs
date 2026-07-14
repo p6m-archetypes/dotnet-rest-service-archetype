@@ -3,6 +3,10 @@ using {{ PrefixName }}{{ SuffixName }};
 {% if persistence ~= 'None' or cache ~= 'None' or messaging ~= 'None' or has_s3 or has_azure_blob %}
 using {{ PrefixName }}{{ SuffixName }}.Resources;
 {% endif %}
+{% if persistence ~= 'None' %}
+using {{ PrefixName }}{{ SuffixName }}.Api;
+using Microsoft.EntityFrameworkCore;
+{% endif %}
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Prometheus;
@@ -85,6 +89,17 @@ try
 
     // TODO: Add your service routes here
     app.MapGet("/", () => "{{ project-name }}");
+{% if persistence ~= 'None' %}
+
+    // Sample scaffold: create the schema and serve CRUD for the Item entity
+    // (Domain/Item.cs, Api/ItemRoutes.cs). Replace with your real model and routes.
+    if (!builder.Environment.IsEnvironment("Testing"))
+    {
+        using (var scope = app.Services.CreateScope())
+            scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.EnsureCreated();
+        app.MapItemRoutes();
+    }
+{% endif %}
 
     app.Run();
 }
