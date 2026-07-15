@@ -6,3 +6,8 @@ paths = ["tests"]
 [profiles.ci]
 paths = ["tests"]
 format = "json"
+
+# Infrastructure dependencies are external plugins (pin released tags once the plugins cut releases).
+[plugins]
+postgres = "prova-rs/prova-postgres@main"
+mysql    = "prova-rs/prova-mysql@main"

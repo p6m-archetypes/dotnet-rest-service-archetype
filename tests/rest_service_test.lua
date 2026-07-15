@@ -6,6 +6,9 @@
 --- Run from the archetype repo root (uses ./prova.toml):   prova
 --- requires docker + dotnet (SDK 9); skips cleanly without them.
 
+local postgres = require("postgres")
+local mysql    = require("mysql")
+
 local SRC = "."
 
 local BASE_ANSWERS = {
