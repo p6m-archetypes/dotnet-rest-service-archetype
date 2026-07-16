@@ -89,20 +89,19 @@ for _, v in ipairs(VARIANTS) do
     local root = ctx:use(project):dir("example-service")
     local db = v.db.container(ctx)
 
-    local build = shell.run("dotnet build ExampleService.sln -c Release", {
-      cwd = root.path, timeout = "600s",
+    shell.run("dotnet build ExampleService.sln -c Release", {
+      cwd = root.path, timeout = "600s", check = true,
     })
-    assert(build:ok(), label .. " failed to build:\n" .. build.stderr .. build.stdout)
 
     local port, mgmt = net.free_port(), net.free_port()
     ctx:manage(shell.spawn("dotnet ExampleService.dll", {
       cwd = root.path .. "/ExampleService/bin/Release/net9.0",
       env = {
         -- Settings binds by property name from configuration (env provider included).
-        Port           = tostring(port),
-        ManagementPort = tostring(mgmt),
-        DbHost         = "127.0.0.1",
-        DbPort         = tostring(db.container:host_port(v.persistence == "MySQL" and 3306 or 5432)),
+        Port           = port,
+        ManagementPort = mgmt,
+        DbHost         = db.host,
+        DbPort         = db.port,
         DbUsername     = "prova",
         DbPassword     = "prova",
         DbDbname       = "prova",
