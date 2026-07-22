@@ -21,6 +21,51 @@ Log.Logger = new LoggerConfiguration()
 try
 {
     var builder = WebApplication.CreateBuilder(args);
+
+    // The platform env contract: PAO injects UPPER_SNAKE variables (SERVER_PORT, MANAGEMENT_PORT,
+    // DB_HOST, ...). .NET's default binder matches property names, not those, so map every
+    // contract variable that is present onto its Settings key before binding. Property-name env
+    // (Port=...) still works — the contract layers on top.
+    var platformEnv = new Dictionary<string, string>
+    {
+        ["HOST"] = "Host",
+        ["SERVER_PORT"] = "Port",
+        ["MANAGEMENT_PORT"] = "ManagementPort",
+        ["DB_HOST"] = "DbHost",
+        ["DB_PORT"] = "DbPort",
+        ["DB_USERNAME"] = "DbUsername",
+        ["DB_PASSWORD"] = "DbPassword",
+        ["DB_DBNAME"] = "DbDbname",
+        ["CACHE_HOST"] = "CacheHost",
+        ["CACHE_PORT"] = "CachePort",
+        ["CACHE_USERNAME"] = "CacheUsername",
+        ["CACHE_PASSWORD"] = "CachePassword",
+        ["MESSAGING_BROKERS"] = "MessagingBrokers",
+        ["MESSAGING_BROKER_URL"] = "MessagingBrokerUrl",
+        ["MESSAGING_TOPIC"] = "MessagingTopic",
+        ["MESSAGING_USERNAME"] = "MessagingUsername",
+        ["MESSAGING_PASSWORD"] = "MessagingPassword",
+        ["MESSAGING_SASL_MECHANISM"] = "MessagingSaslMechanism",
+        ["MESSAGING_JWT_TOKEN"] = "MessagingJwtToken",
+        ["MESSAGING_SUBSCRIPTION_NAME"] = "MessagingSubscriptionName",
+        ["MESSAGING_ACCESS"] = "MessagingAccess",
+        ["S3_ENDPOINT"] = "S3Endpoint",
+        ["S3_BUCKET"] = "S3Bucket",
+        ["S3_PREFIX"] = "S3Prefix",
+        ["S3_ACCESS_KEY"] = "S3AccessKey",
+        ["S3_SECRET_KEY"] = "S3SecretKey",
+        ["AZURE_ENDPOINT"] = "AzureEndpoint",
+        ["AZURE_CONTAINER"] = "AzureContainer",
+        ["AZURE_ACCOUNT_NAME"] = "AzureAccountName",
+        ["AZURE_ACCOUNT_KEY"] = "AzureAccountKey",
+    };
+    var contractOverrides = new Dictionary<string, string?>();
+    foreach (var (env, key) in platformEnv)
+    {
+        if (builder.Configuration[env] is { Length: > 0 } value) contractOverrides[key] = value;
+    }
+    builder.Configuration.AddInMemoryCollection(contractOverrides);
+
     var settings = builder.Configuration.Get<Settings>() ?? new Settings();
 
     // Structured logging via Serilog (JSON when LOGGING_STRUCTURED=true)

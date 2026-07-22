@@ -1,13 +1,14 @@
 # Prova acceptance tests: `prova` from the repo root runs the whole suite.
 [run]
-paths = ["tests"]
+proofs = ["tests"]
 
 # CI runs the same suite; capability gating (docker/dotnet) handles what a runner lacks.
 [profiles.ci]
-paths = ["tests"]
 format = "json"
 
-# Infrastructure dependencies are external plugins (pin released tags once the plugins cut releases).
+# Infrastructure plugins pinned to released tags; `p6m` is the org standards suite (path-local
+# while it incubates in this workspace — pin its git tag once published).
 [plugins]
-postgres = "prova-rs/prova-postgres@main"
-mysql    = "prova-rs/prova-mysql@main"
+postgres = "prova-rs/prova-postgres@v1"
+mysql    = "prova-rs/prova-mysql@v1"
+p6m      = { path = "../prova-p6m-standards" }

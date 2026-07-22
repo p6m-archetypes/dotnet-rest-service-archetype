@@ -13,14 +13,14 @@ public static class ItemRoutes
 {
     public static IEndpointRouteBuilder MapItemRoutes(this IEndpointRouteBuilder app)
     {
-        var items = app.MapGroup("/api/items");
+        var items = app.MapGroup("/api/v1/{{ prefix-name }}s");
 
         items.MapPost("", async (CreateItemRequest request, AppDbContext db) =>
         {
             var item = new Item { Id = Guid.NewGuid(), DisplayName = request.DisplayName };
             db.Items.Add(item);
             await db.SaveChangesAsync();
-            return Results.Created($"/api/items/{item.Id}", item);
+            return Results.Created($"/api/v1/{{ prefix-name }}s/{item.Id}", item);
         });
 
         items.MapGet("", async (AppDbContext db) =>

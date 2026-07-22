@@ -205,7 +205,7 @@ for _, v in ipairs(VARIANTS) do
       local svc = t:use(sut)
 
       -- Create through the public API...
-      local created = svc.api:post("/api/items", { json = { displayName = "widget" } })
+      local created = svc.api:post("/api/v1/examples", { json = { displayName = "widget" } })
       t:expect(created.status):equals(201)
       local body = created:json()
       t:expect(body.displayName):equals("widget")
@@ -215,21 +215,21 @@ for _, v in ipairs(VARIANTS) do
       t:expect(svc.db:query_value(v.count_by_name, { "widget" }), "rows in DB"):equals(1)
 
       -- Read back through every door.
-      t:expect(svc.api:get("/api/items/" .. body.id):json().displayName):equals("widget")
+      t:expect(svc.api:get("/api/v1/examples/" .. body.id):json().displayName):equals("widget")
     end)
 
     g:test("updates and deletes round-trip into " .. v.persistence, function(t)
       local svc = t:use(sut)
 
-      local body = svc.api:post("/api/items", { json = { displayName = "ephemeral" } }):json()
+      local body = svc.api:post("/api/v1/examples", { json = { displayName = "ephemeral" } }):json()
 
-      local updated = svc.api:put("/api/items/" .. body.id, { json = { displayName = "renamed" } })
+      local updated = svc.api:put("/api/v1/examples/" .. body.id, { json = { displayName = "renamed" } })
       t:expect(updated.status):equals(200)
       t:expect(svc.db:query_value(v.count_by_name, { "renamed" }), "renamed row in DB"):equals(1)
       t:expect(svc.db:query_value(v.count_by_name, { "ephemeral" }), "old name gone"):equals(0)
 
-      t:expect(svc.api:delete("/api/items/" .. body.id).status):equals(204)
-      t:expect(svc.api:get("/api/items/" .. body.id).status):equals(404)
+      t:expect(svc.api:delete("/api/v1/examples/" .. body.id).status):equals(204)
+      t:expect(svc.api:get("/api/v1/examples/" .. body.id).status):equals(404)
       t:expect(svc.db:query_value(v.count_by_name, { "renamed" }), "row deleted from DB"):equals(0)
     end)
   end
