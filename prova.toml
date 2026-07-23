@@ -2,13 +2,13 @@
 [run]
 proofs = ["tests"]
 
-# CI runs the same suite; capability gating (docker/dotnet) handles what a runner lacks.
+# CI runs the same suite; docker is the only capability a runner needs (S8b).
 [profiles.ci]
 format = "json"
 
-# Infrastructure plugins pinned to released tags; `p6m` is the org standards suite (path-local
-# while it incubates in this workspace — pin its git tag once published).
+# Infrastructure plugins pinned to released tags; `p6m` is the org standards suite (released v1;
+# the ratchet: spec bumps move the v1 tag and the fleet answers).
 [plugins]
 postgres = "prova-rs/prova-postgres@v1"
 mysql    = "prova-rs/prova-mysql@v1"
-p6m      = { path = "../prova-p6m-standards" }
+p6m      = "p6m-archetypes/prova-p6m-standards@v1"
