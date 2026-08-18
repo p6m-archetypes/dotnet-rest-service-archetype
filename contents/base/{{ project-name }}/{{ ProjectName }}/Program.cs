@@ -136,8 +136,8 @@ try
     app.MapGet("/", () => "{{ project-name }}");
 {% if persistence ~= 'None' %}
 
-    // Sample scaffold: create the schema and serve CRUD for the Item entity
-    // (Domain/Item.cs, Api/ItemRoutes.cs). Replace with your real model and routes.
+    // Sample scaffold: create the schema and serve CRUD for the {{ EntityName }} entity
+    // (Domain/{{ EntityName }}.cs, Api/{{ EntityName }}Routes.cs). Replace with your real model and routes.
     if (!builder.Environment.IsEnvironment("Testing"))
     {
         using (var scope = app.Services.CreateScope())

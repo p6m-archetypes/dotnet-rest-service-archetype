@@ -7,5 +7,5 @@ namespace {{ ProjectName }}.Resources;
 // (Persistence.cs); the service owns its entities here, via the partial-class seam.
 public partial class AppDbContext
 {
-    public DbSet<Item> Items => Set<Item>();
+    public DbSet<{{ EntityName }}> {{ EntityName }}s => Set<{{ EntityName }}>();
 }
