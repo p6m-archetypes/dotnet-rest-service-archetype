@@ -1,116 +1,92 @@
---- Render-verification suite for the .NET REST service archetype: each persistence variant lays
+--- Render-verification suite for the Dotnet REST service archetype: each persistence variant lays
 --- out correctly and is fully rendered, and the hollow (None) rendering stays hollow.
 ---
---- The BEHAVIORAL bar — CRUD through the production image, the platform env contract, health/
---- metrics/structured logs, both name shapes — lives in tests/standards_test.lua (the shared
---- p6m standards suite), fully containerized: docker is the only requirement. Compile coverage
---- is containerized too: the standards SUT image builds compile the persistence variants, and
---- the hollow rendering is proven compilable by building its production Dockerfile here — no
---- host SDK is ever required.
+--- Every rendering comes from `p6m.spec{}` + `p6m.render` — the shape harness — so the paths this
+--- file expects are BUILT from the same identity the archetype was answered with, never spelled by
+--- hand. A hand-spelled path list is how a scaffold file outlived the entity it was named for.
 ---
---- Run from the archetype repo root (uses ./prova.toml):   prova
+--- The BEHAVIORAL bar — CRUD through the production image, the platform env contract, health/
+--- metrics/structured logs, both name shapes — lives in proofs/standards.prova.lua, which also owns
+--- S10 CI parity. No host toolchain is invoked here (S8b).
 
 local p6m = require("p6m")
 
-local SRC = "."
-
-local BASE_ANSWERS = {
-  project_name = "example-service",
-  solution_name = "acme-platform",
-  entity_name = "example",
-  image_registry  = "ghcr.io/acme",
-}
-
--- NOTE: named, and that is load-bearing. `ctx:tempdir("render1")` is ADDRESSED, not created, so every
--- unnamed call in one scope answers with the SAME directory: two renders into one destination
--- leave the first winner in place and the second silently asserts against it. That is what made
--- the hollow variant see the persistence variant's files.
-local function answers_with(extra)
-  local out = {}
-  for k, v in pairs(BASE_ANSWERS) do out[k] = v end
-  for k, v in pairs(extra) do out[k] = v end
-  return out
+local function spec_for(persistence)
+  return p6m.spec{
+    language = "dotnet", shape = "full", transport = "rest",
+    project = "example-service", entity = "example", solution = "acme-platform",
+    persistence = persistence, registry = "ghcr.io/acme",
+  }
 end
 
--- Files the persistence scaffold must produce (relative to the rendered project root).
-local SCAFFOLD_FILES = {
-  "ExampleService/Resources/Persistence.cs",
-  "ExampleService/Resources/Persistence.Entities.cs",
-  "ExampleService/Domain/ExampleEntity.cs",
-  "ExampleService/Api/ExampleRoutes.cs",
-}
+local function paths(s)
+  -- The .NET project directory and every type in it follow the identity: `ProjectName` names the
+  -- csproj and the solution, `EntityName` the scaffold entity the persistence variant adds.
+  local P = s.id.ProjectName
+  local E = s.id.EntityName
+  return {
+    base = {
+      P .. ".sln",
+      "Directory.Build.props",
+      P .. "/" .. P .. ".csproj",
+      P .. "/Program.cs",
+      P .. "/Settings.cs",
+      P .. "/appsettings.json",
+      P .. ".Tests/" .. P .. ".Tests.csproj",
+      ".dockerignore",
+      ".platform/docker/local/Dockerfile",
+      ".platform/docker/prd/Dockerfile",
+    },
+    scaffold = {
+      P .. "/Domain/" .. E .. "Entity.cs",
+      P .. "/Resources/Persistence.cs",
+      P .. "/Resources/Persistence.Entities.cs",
+      P .. "/Api/" .. E .. "Routes.cs",
+    },
+  }
+end
 
 for _, persistence in ipairs({ "PostgreSQL", "MySQL" }) do
-  local label = "dotnet-rest[" .. persistence .. "]"
+  local s = spec_for(persistence)
+  local f = paths(s)
 
-  local project = prova.fixture(label .. ":project", Scope.File, function(ctx)
-    return archetect.render{
-      source = SRC,
-      answers = answers_with{ persistence = persistence },
-      destination = ctx:tempdir("render1"),
-      defaults = true,
-    }
-  end)
+  local expected = {}
+  for _, x in ipairs(f.base) do expected[#expected + 1] = x end
+  for _, x in ipairs(f.scaffold) do expected[#expected + 1] = x end
 
-  archetect.verify(project, {
-    name = label,
-    project_dir = "example-service",
-    expected_files = {
-      "ExampleService.sln",
-      "ExampleService/Program.cs",
-      "ExampleService/Settings.cs",
-      "ExampleService/appsettings.json",
-      "ExampleService/ExampleService.csproj",
-      ".dockerignore",
-      SCAFFOLD_FILES[1], SCAFFOLD_FILES[2], SCAFFOLD_FILES[3], SCAFFOLD_FILES[4],
-      ".github/workflows/build.yaml",
-    },
+  archetect.verify{
+    name = s.label,
+    source = ".",
+    answers = s.answers,
+    project_dir = s.project_dir,
+    expected_files = expected,
     yaml_globs = { ".platform/kubernetes/**/*.yaml" },
-  })
+  }
 end
 
 -- The hollow rendering stays hollow: no persistence, no scaffold files.
-local none_project = prova.fixture("dotnet-rest[None]:project", Scope.File, function(ctx)
-  return archetect.render{
-    source = SRC,
-    answers = answers_with{ persistence = "None" },
-    destination = ctx:tempdir("render2"),
-    defaults = true,
-  }
-end)
+local none = spec_for("None")
+local none_paths = paths(none)
+local none_project = p6m.render(none)
 
 archetect.verify(none_project, {
-  name = "dotnet-rest[None]",
-  project_dir = "example-service",
-  expected_files = {
-    "ExampleService.sln",
-    "ExampleService/Program.cs",
-  },
-  absent_files = SCAFFOLD_FILES,
+  name = none.label,
+  project_dir = none.project_dir,
+  expected_files = none_paths.base,
+  absent_files = none_paths.scaffold,
+  yaml_globs = { ".platform/kubernetes/**/*.yaml" },
 })
 
--- Containerized compile proof for the hollow rendering: the persistence variants are compiled by
--- the standards suite's SUT image builds; None never boots there, so prove it compiles by
--- building its production Dockerfile (build success = it compiles; no boot needed).
-prova.group("dotnet-rest[None]:image", { requires = { "docker" } }, function(g)
-  g:test("production image builds (compiles the hollow rendering)", function(t)
-    local root = t:use(none_project):dir("example-service")
+-- Containerized compile proof for the hollow variant (S8b): the persistence variants compile
+-- inside the standards SUT image builds; None never boots there, so prove it compiles by building
+-- its production image — build success IS the compile check, no boot needed.
+prova.group(none.label .. ":image", { requires = { "docker" } }, function(g)
+  g:test("production image builds from a clean render", function(t)
+    local root = t:use(none_project):dir(none.project_dir)
     local image = docker.build{
       context = root.path,
       dockerfile = ".platform/docker/prd/Dockerfile",
     }
-    t:expect(image, "built image ref"):never():is_empty()
+    t:expect(image, "built image"):never():is_nil()
   end)
-end)
-
--- CI parity (S10): the rendered project's own Build workflow path — dotnet-setup/dotnet-build's
--- exact command sequence on a fresh clone, in the toolchain image. The Dockerfile and CI are two
--- independent build paths; S10 holds the second. The hollow render suffices: resource variants
--- change dependencies, not the command path.
-prova.group("dotnet-rest[None]:ci", { requires = { "docker" }, tags = { "standards" } }, function(g)
-  p6m.standards.ci_parity(g, none_project, {
-    stack = "dotnet",
-    project_dir = "example-service",
-    name = "dotnet-rest",
-  })
 end)
