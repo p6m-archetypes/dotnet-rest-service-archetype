@@ -19,9 +19,9 @@ local LANG_ANSWERS = {}
 -- on the second) paired with persistence backend.
 local VARIANTS = {
   { project = "customer-service", entity = "customer",
-    persistence = "PostgreSQL", db = postgres, placeholder = "$1" },
+    persistence = "PostgreSQL", db = postgres, placeholder = "$1", q = '"' },
   { project = "user-details-service", entity = "user-details",
-    persistence = "MySQL", db = mysql, placeholder = "?" },
+    persistence = "MySQL", db = mysql, placeholder = "?", q = "`" },
 }
 
 for _, v in ipairs(VARIANTS) do
@@ -46,8 +46,10 @@ for _, v in ipairs(VARIANTS) do
         -- never fail against a hardcoded name there, which is how the drift survived.
         t:expect(
           svc.db.client:query_value(
-            "SELECT count(*) FROM " .. spec.table_name
-              .. " WHERE " .. spec.display_name_column .. " = " .. v.placeholder,
+            -- EF Core creates quoted PascalCase identifiers; an unquoted reference folds to
+            -- lowercase in Postgres and misses them. The snake-case stacks need no quoting.
+            "SELECT count(*) FROM " .. v.q .. spec.table_name .. v.q
+              .. " WHERE " .. v.q .. spec.display_name_column .. v.q .. " = " .. v.placeholder,
             { name }),
           "rows in the database"
         ):equals(count)
