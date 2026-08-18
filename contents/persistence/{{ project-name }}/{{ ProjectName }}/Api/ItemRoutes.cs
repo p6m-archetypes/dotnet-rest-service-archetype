@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
-using {{ PrefixName }}{{ SuffixName }}.Domain;
-using {{ PrefixName }}{{ SuffixName }}.Resources;
+using {{ ProjectName }}.Domain;
+using {{ ProjectName }}.Resources;
 
-namespace {{ PrefixName }}{{ SuffixName }}.Api;
+namespace {{ ProjectName }}.Api;
 
 public record CreateItemRequest(string DisplayName);
 public record UpdateItemRequest(string DisplayName);
@@ -13,14 +13,14 @@ public static class ItemRoutes
 {
     public static IEndpointRouteBuilder MapItemRoutes(this IEndpointRouteBuilder app)
     {
-        var items = app.MapGroup("/api/v1/{{ prefix-name }}s");
+        var items = app.MapGroup("/api/v1/{{ entity-name }}s");
 
         items.MapPost("", async (CreateItemRequest request, AppDbContext db) =>
         {
             var item = new Item { Id = Guid.NewGuid(), DisplayName = request.DisplayName };
             db.Items.Add(item);
             await db.SaveChangesAsync();
-            return Results.Created($"/api/v1/{{ prefix-name }}s/{item.Id}", item);
+            return Results.Created($"/api/v1/{{ entity-name }}s/{item.Id}", item);
         });
 
         items.MapGet("", async (AppDbContext db) =>

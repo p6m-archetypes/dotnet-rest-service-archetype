@@ -1,4 +1,4 @@
-namespace {{ PrefixName }}{{ SuffixName }};
+namespace {{ ProjectName }};
 
 public class Settings
 {

@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../{{ PrefixName }}{{ SuffixName }}/{{ PrefixName }}{{ SuffixName }}.csproj" />
+    <ProjectReference Include="../{{ ProjectName }}/{{ ProjectName }}.csproj" />
   </ItemGroup>
 
 </Project>

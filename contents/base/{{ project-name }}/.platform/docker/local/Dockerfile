@@ -5,8 +5,8 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS builder
 WORKDIR /src
 
 COPY . .
-RUN dotnet restore "{{ PrefixName }}{{ SuffixName }}/{{ PrefixName }}{{ SuffixName }}.csproj" && \
-    dotnet publish "{{ PrefixName }}{{ SuffixName }}/{{ PrefixName }}{{ SuffixName }}.csproj" \
+RUN dotnet restore "{{ ProjectName }}/{{ ProjectName }}.csproj" && \
+    dotnet publish "{{ ProjectName }}/{{ ProjectName }}.csproj" \
         -c Release \
         -o /app/publish \
         --no-restore
@@ -23,4 +23,4 @@ ENV ASPNETCORE_URLS=""
 EXPOSE {{ service_port }}
 EXPOSE {{ management_port }}
 
-ENTRYPOINT ["dotnet", "{{ PrefixName }}{{ SuffixName }}.dll"]
+ENTRYPOINT ["dotnet", "{{ ProjectName }}.dll"]

@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using {{ PrefixName }}{{ SuffixName }}.Domain;
+using {{ ProjectName }}.Domain;
 
-namespace {{ PrefixName }}{{ SuffixName }}.Resources;
+namespace {{ ProjectName }}.Resources;
 
 // The entity half of AppDbContext. The resource library owns provider wiring
 // (Persistence.cs); the service owns its entities here, via the partial-class seam.

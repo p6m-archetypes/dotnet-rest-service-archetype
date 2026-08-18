@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.Hosting;
 using Xunit;
 
-namespace {{ PrefixName }}{{ SuffixName }}.Tests;
+namespace {{ ProjectName }}.Tests;
 
 public class TestWebApplicationFactory : WebApplicationFactory<Program>
 {

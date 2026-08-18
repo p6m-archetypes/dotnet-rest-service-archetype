@@ -1,10 +1,10 @@
 using System.Net;
-using {{ PrefixName }}{{ SuffixName }};
+using {{ ProjectName }};
 {% if persistence ~= 'None' or cache ~= 'None' or messaging ~= 'None' or has_s3 or has_azure_blob %}
-using {{ PrefixName }}{{ SuffixName }}.Resources;
+using {{ ProjectName }}.Resources;
 {% endif %}
 {% if persistence ~= 'None' %}
-using {{ PrefixName }}{{ SuffixName }}.Api;
+using {{ ProjectName }}.Api;
 using Microsoft.EntityFrameworkCore;
 {% endif %}
 using OpenTelemetry.Resources;
