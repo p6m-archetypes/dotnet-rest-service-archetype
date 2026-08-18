@@ -17,7 +17,7 @@ public static class {{ EntityName }}Routes
 
         {{ entity_name }}s.MapPost("", async (CreateItemRequest request, AppDbContext db) =>
         {
-            var item = new {{ EntityName }} { Id = Guid.NewGuid(), DisplayName = request.DisplayName };
+            var item = new {{ EntityName }}Entity { Id = Guid.NewGuid(), DisplayName = request.DisplayName };
             db.{{ EntityName }}s.Add(item);
             await db.SaveChangesAsync();
             return Results.Created($"/api/v1/{{ entity-name }}s/{item.Id}", item);

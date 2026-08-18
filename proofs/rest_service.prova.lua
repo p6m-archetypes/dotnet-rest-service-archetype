@@ -36,7 +36,7 @@ end
 local SCAFFOLD_FILES = {
   "ExampleService/Resources/Persistence.cs",
   "ExampleService/Resources/Persistence.Entities.cs",
-  "ExampleService/Domain/Example.cs",
+  "ExampleService/Domain/ExampleEntity.cs",
   "ExampleService/Api/ExampleRoutes.cs",
 }
 

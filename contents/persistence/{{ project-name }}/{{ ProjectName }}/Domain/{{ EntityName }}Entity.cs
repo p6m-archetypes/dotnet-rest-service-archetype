@@ -2,7 +2,7 @@ namespace {{ ProjectName }}.Domain;
 
 // Sample scaffold entity proving the persistence round trip end-to-end.
 // Replace with your real domain model (and rename the routes in Api/{{ EntityName }}Routes.cs to match).
-public class {{ EntityName }}
+public class {{ EntityName }}Entity
 {
     public Guid Id { get; set; }
     public required string DisplayName { get; set; }
