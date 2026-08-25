@@ -1,0 +1,7 @@
+# Keep host build state out of the image build context — both Dockerfiles COPY . . and a host
+# build's bin/obj carry absolute-path project.assets.json that would poison the in-image restore.
+**/bin/
+**/obj/
+.git/
+.platform/
+*.md
